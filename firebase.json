@@ -12,10 +12,12 @@
     "indexes": "firestore.indexes.json"
   },
   "emulators": {
-    "functions": { "port": 5001 },
-    "firestore": { "port": 8080 },
+    "functions": { "port": 5501 },
+    "firestore": { "port": 8081 },
     "auth": { "port": 9099 },
-    "ui": { "enabled": true, "port": 4000 },
+    "ui": { "enabled": true, "port": 4010 },
+    "hub": { "port": 4410 },
+    "logging": { "port": 4510 },
     "singleProjectMode": true
   }
 }
