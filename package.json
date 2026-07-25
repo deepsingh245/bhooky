@@ -1,0 +1,19 @@
+{
+  "name": "bhooky",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "test": "npm run test --workspaces --if-present",
+    "dev": "npm run dev -w apps/web",
+    "emulators": "firebase emulators:start --project demo-bhooky",
+    "seed": "npm run seed -w apps/functions"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,17 @@
+rules_version = '2';
+
+// All reads/writes to these collections happen server-side via the Admin SDK
+// inside Cloud Functions, which bypasses these rules entirely. Denying direct
+// client access here is a deliberate second layer: it guarantees the raw
+// Swiggy bearer token in swiggy_sessions can never leak through a client-side
+// Firestore read, even if a future change (accidentally) tried one.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /queries/{queryId} {
+      allow read, write: if false;
+    }
+    match /swiggy_sessions/{userId} {
+      allow read, write: if false;
+    }
+  }
+}

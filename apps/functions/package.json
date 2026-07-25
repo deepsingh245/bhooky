@@ -1,0 +1,31 @@
+{
+  "name": "@bhooky/functions",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": "20"
+  },
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc -b",
+    "build:watch": "tsc -b -w",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "seed": "tsx scripts/seedSwiggySession.ts"
+  },
+  "dependencies": {
+    "@bhooky/shared": "*",
+    "@google/genai": "^2.13.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "firebase-admin": "^14.2.0",
+    "firebase-functions": "^7.3.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  }
+}
