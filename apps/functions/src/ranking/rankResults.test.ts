@@ -70,4 +70,23 @@ describe("rankResults", () => {
   it("returns an empty array when there are no items", () => {
     expect(rankResults([], restaurants, baseIntent)).toEqual([]);
   });
+
+  it("ranks a restaurant with a strong coupon above an otherwise-identical one without", () => {
+    const identicalItems: NormalizedMenuItem[] = [
+      { id: "m1", restaurantId: "r1", name: "Dal Makhani", price: 200, veg: true, tags: [], available: true },
+      { id: "m2", restaurantId: "r2", name: "Veg Buddha Bowl", price: 200, veg: true, tags: [], available: true },
+    ];
+    const identicalRestaurants: NormalizedRestaurant[] = [
+      { ...restaurants[0]!, priceRange: { min: 200, max: 200 } },
+      { ...restaurants[1]!, id: "r2", rating: restaurants[0]!.rating, distanceKm: restaurants[0]!.distanceKm },
+    ];
+    const offerScoresByRestaurantId = new Map([
+      ["r1", 0],
+      ["r2", 1],
+    ]);
+
+    const ranked = rankResults(identicalItems, identicalRestaurants, baseIntent, offerScoresByRestaurantId);
+
+    expect(ranked[0]?.restaurant.id).toBe("r2");
+  });
 });

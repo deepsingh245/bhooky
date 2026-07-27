@@ -5,11 +5,13 @@ import { FoodCard } from "./FoodCard.js";
 interface ResultsGridProps {
   status: SearchStatus;
   results: RankedCard[];
+  onAddToCart: (card: RankedCard) => void;
+  addingMenuItemId: string | null;
 }
 
 const SKELETON_COUNT = 6;
 
-export function ResultsGrid({ status, results }: ResultsGridProps) {
+export function ResultsGrid({ status, results, onAddToCart, addingMenuItemId }: ResultsGridProps) {
   if (status === "loading") {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -33,7 +35,12 @@ export function ResultsGrid({ status, results }: ResultsGridProps) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {results.map((card) => (
-        <FoodCard key={card.menuItem.id} card={card} />
+        <FoodCard
+          key={card.menuItem.id}
+          card={card}
+          onAddToCart={() => onAddToCart(card)}
+          adding={addingMenuItemId === card.menuItem.id}
+        />
       ))}
     </div>
   );

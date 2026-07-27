@@ -11,19 +11,15 @@ interface SearchState {
   errorMessage: string | null;
 }
 
-// Phase 1 has no address-selection UI (out of scope per plans/phase-1-plan.md);
-// the mock Swiggy client ignores addressId entirely.
-const DEV_ADDRESS_ID = "dev-address";
-
 const INITIAL_STATE: SearchState = { status: "idle", results: [], intent: null, errorMessage: null };
 
 export function useSearch() {
   const [state, setState] = useState<SearchState>(INITIAL_STATE);
 
-  const search = useCallback(async (rawQuery: string) => {
+  const search = useCallback(async (rawQuery: string, addressId: string) => {
     setState({ status: "loading", results: [], intent: null, errorMessage: null });
     try {
-      const response = await callSearchFood(rawQuery, DEV_ADDRESS_ID);
+      const response = await callSearchFood(rawQuery, addressId);
       setState({ status: "success", results: response.results, intent: response.intent, errorMessage: null });
     } catch (error) {
       if (error instanceof SwiggyReconnectRequiredError) {

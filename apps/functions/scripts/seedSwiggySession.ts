@@ -1,5 +1,6 @@
 import { getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import { mockSwiggyToken } from "../src/swiggy/mockToken.js";
 
 process.env.FIRESTORE_EMULATOR_HOST ??= "127.0.0.1:8081";
 
@@ -27,7 +28,7 @@ async function main(): Promise<void> {
     .collection("swiggy_sessions")
     .doc(uid)
     .set({
-      token: "dev-fake-swiggy-bearer-token",
+      token: mockSwiggyToken(uid),
       expiresAt: Timestamp.fromMillis(Date.now() + FIVE_DAYS_MS),
     });
 

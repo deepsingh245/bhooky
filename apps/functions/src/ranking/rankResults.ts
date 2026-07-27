@@ -12,10 +12,14 @@ const MAX_RELEVANT_DISTANCE_KM = 10;
 
 // score = (budget_match * 0.3) + (distance * 0.2) + (rating * 0.2) + (offer * 0.2) + (intent_match * 0.1)
 // See BHOOKY_BUILD_PLAN.md §5. Closed restaurants and out-of-stock items never rank.
+// offerScoresByRestaurantId is coupon-derived (see ranking/offerScore.ts); it
+// defaults to empty so callers/tests that don't care about offers fall back to
+// the Phase 1 neutral placeholder score.
 export function rankResults(
   items: NormalizedMenuItem[],
   restaurants: NormalizedRestaurant[],
   intent: ParsedIntent,
+  offerScoresByRestaurantId: Map<string, number> = new Map(),
 ): RankedCard[] {
   const restaurantById = new Map(restaurants.map((restaurant) => [restaurant.id, restaurant]));
 
@@ -28,7 +32,7 @@ export function rankResults(
       budgetMatch: scoreBudgetMatch(menuItem.price, intent.budget),
       distance: scoreDistance(restaurant.distanceKm),
       rating: scoreRating(restaurant.rating),
-      offer: NEUTRAL_OFFER_SCORE,
+      offer: offerScoresByRestaurantId.get(restaurant.id) ?? NEUTRAL_OFFER_SCORE,
       intentMatch: scoreIntentMatch(menuItem, intent),
     };
 

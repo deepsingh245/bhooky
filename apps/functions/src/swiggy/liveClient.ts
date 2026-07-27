@@ -1,11 +1,24 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type {
+  ApplyCouponArgs,
+  FetchCouponsArgs,
+  GetCartArgs,
+  GetFoodOrdersArgs,
   GetMenuArgs,
+  PlaceOrderArgs,
+  RawSwiggyAddressesResponse,
+  RawSwiggyCart,
+  RawSwiggyCouponsResponse,
   RawSwiggyMenuResponse,
+  RawSwiggyOrder,
+  RawSwiggyOrdersResponse,
   RawSwiggySearchResponse,
+  RawSwiggyTrackOrderResponse,
   SearchRestaurantsArgs,
   SwiggyMcpPort,
+  TrackOrderArgs,
+  UpdateCartArgs,
 } from "./types.js";
 
 /**
@@ -27,6 +40,38 @@ export class LiveSwiggyMcpClient implements SwiggyMcpPort {
 
   async getRestaurantMenu(args: GetMenuArgs): Promise<RawSwiggyMenuResponse> {
     return this.callTool<RawSwiggyMenuResponse>("get_restaurant_menu", args);
+  }
+
+  async getAddresses(): Promise<RawSwiggyAddressesResponse> {
+    return this.callTool<RawSwiggyAddressesResponse>("get_addresses", {});
+  }
+
+  async getFoodCart(args: GetCartArgs): Promise<RawSwiggyCart> {
+    return this.callTool<RawSwiggyCart>("get_food_cart", args);
+  }
+
+  async updateFoodCart(args: UpdateCartArgs): Promise<RawSwiggyCart> {
+    return this.callTool<RawSwiggyCart>("update_food_cart", args);
+  }
+
+  async fetchFoodCoupons(args: FetchCouponsArgs): Promise<RawSwiggyCouponsResponse> {
+    return this.callTool<RawSwiggyCouponsResponse>("fetch_food_coupons", args);
+  }
+
+  async applyFoodCoupon(args: ApplyCouponArgs): Promise<RawSwiggyCart> {
+    return this.callTool<RawSwiggyCart>("apply_food_coupon", args);
+  }
+
+  async placeFoodOrder(args: PlaceOrderArgs): Promise<RawSwiggyOrder> {
+    return this.callTool<RawSwiggyOrder>("place_food_order", args);
+  }
+
+  async trackFoodOrder(args: TrackOrderArgs): Promise<RawSwiggyTrackOrderResponse> {
+    return this.callTool<RawSwiggyTrackOrderResponse>("track_food_order", args);
+  }
+
+  async getFoodOrders(args: GetFoodOrdersArgs): Promise<RawSwiggyOrdersResponse> {
+    return this.callTool<RawSwiggyOrdersResponse>("get_food_orders", args);
   }
 
   private async callTool<T>(name: string, args: object): Promise<T> {

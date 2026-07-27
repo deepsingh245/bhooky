@@ -1,4 +1,4 @@
-import type { RawSwiggyMenuItem, RawSwiggyRestaurant } from "../types.js";
+import type { RawSwiggyAddress, RawSwiggyCoupon, RawSwiggyMenuItem, RawSwiggyRestaurant } from "../types.js";
 
 /**
  * Five restaurants chosen so every ranking axis (budget/distance/rating/intent,
@@ -102,3 +102,27 @@ export const MOCK_MENUS_BY_RESTAURANT_ID: Record<string, RawSwiggyMenuItem[]> = 
     { id: "r5-m2", name: "Club Sandwich", price: 250, isVeg: false, tags: ["mild"], inStock: true },
   ],
 };
+
+export const MOCK_ADDRESSES: RawSwiggyAddress[] = [
+  {
+    id: "addr-home",
+    annotation: "Home",
+    addressLine1: "221B Baker Street",
+    addressLine2: "Bandra West, Mumbai",
+    isDefault: true,
+  },
+  {
+    id: "addr-work",
+    annotation: "Work",
+    addressLine1: "42 Residency Road",
+    addressLine2: "Lower Parel, Mumbai",
+    isDefault: false,
+  },
+];
+
+// One always-applicable coupon and one with a minimum-order-value gate, so
+// CouponInput.tsx has a real greyed-out ("not applicable yet") case to render.
+export const MOCK_COUPONS: RawSwiggyCoupon[] = [
+  { code: "FLAT50", description: "Flat ₹50 off", discountAmount: 50, minOrderValueRupees: null },
+  { code: "MIN300GET20", description: "₹20 off on orders above ₹300", discountAmount: 20, minOrderValueRupees: 300 },
+];

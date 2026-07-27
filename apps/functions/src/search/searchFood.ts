@@ -1,7 +1,9 @@
 import type { SearchResponse } from "@bhooky/shared";
 import { parseIntent } from "../gemini/parseIntent.js";
 import { logQuery } from "../logging/logQuery.js";
+import { computeOfferScore } from "../ranking/offerScore.js";
 import { rankResults } from "../ranking/rankResults.js";
+import { getCouponsForCandidates } from "../swiggy/getCoupons.js";
 import { getMenuForCandidates } from "../swiggy/getMenu.js";
 import { getSwiggyMcpClient } from "../swiggy/mcpClient.js";
 import { searchRestaurants } from "../swiggy/searchRestaurants.js";
@@ -19,17 +21,21 @@ export async function searchFood(userId: string, addressId: string, rawQuery: st
   const searchResponse = await searchRestaurants(client, addressId, intent);
   const candidateRestaurants = searchResponse.restaurants.slice(0, MAX_MENU_FETCH_CANDIDATES);
 
-  const menuResponses = await getMenuForCandidates(
-    client,
-    candidateRestaurants.map((restaurant) => restaurant.id),
-  );
+  const candidateRestaurantIds = candidateRestaurants.map((restaurant) => restaurant.id);
+  const [menuResponses, couponResponses] = await Promise.all([
+    getMenuForCandidates(client, candidateRestaurantIds),
+    getCouponsForCandidates(client, addressId, candidateRestaurantIds),
+  ]);
 
   const normalizedRestaurants = candidateRestaurants.map(normalizeRestaurant);
   const normalizedItems = menuResponses.flatMap((menu) =>
     menu.items.map((item) => normalizeMenuItem(item, menu.restaurantId)),
   );
+  const offerScoresByRestaurantId = new Map(
+    couponResponses.map((response) => [response.restaurantId, computeOfferScore(response.coupons)]),
+  );
 
-  const rankedCards = rankResults(normalizedItems, normalizedRestaurants, intent);
+  const rankedCards = rankResults(normalizedItems, normalizedRestaurants, intent, offerScoresByRestaurantId);
 
   void logQuery(
     userId,

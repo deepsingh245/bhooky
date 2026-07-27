@@ -8,5 +8,5 @@ import type { SwiggyMcpPort } from "./types.js";
 // the frontend ever branches on mock-vs-live.
 export function getSwiggyMcpClient(bearerToken: string): SwiggyMcpPort {
   const mode = process.env.SWIGGY_MCP_MODE ?? "mock";
-  return mode === "live" ? new LiveSwiggyMcpClient(bearerToken) : new MockSwiggyMcpClient();
+  return mode === "live" ? new LiveSwiggyMcpClient(bearerToken) : new MockSwiggyMcpClient(bearerToken);
 }

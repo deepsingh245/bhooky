@@ -13,5 +13,17 @@ service cloud.firestore {
     match /swiggy_sessions/{userId} {
       allow read, write: if false;
     }
+    match /oauth_states/{state} {
+      allow read, write: if false;
+    }
+    match /carts/{userId} {
+      allow read, write: if false;
+    }
+    match /orders/{orderId} {
+      allow read, write: if false;
+    }
+    match /ranking_feedback/{feedbackId} {
+      allow read, write: if false;
+    }
   }
 }
