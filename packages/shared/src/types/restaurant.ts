@@ -4,6 +4,7 @@ export interface NormalizedRestaurant {
   rating: number;
   priceRange: { min: number; max: number };
   distanceKm: number;
+  deliveryTimeMinutes: number;
   isOpen: boolean;
   cuisines: string[];
 }

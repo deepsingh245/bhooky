@@ -1,3 +1,4 @@
+import { getOrFetch } from "./restaurantCache.js";
 import type { RawSwiggyCoupon, SwiggyMcpPort } from "./types.js";
 
 const MAX_CONCURRENT_COUPON_FETCHES = 3;
@@ -21,7 +22,9 @@ export async function getCouponsForCandidates(
       const index = cursor++;
       const restaurantId = restaurantIds[index];
       if (restaurantId === undefined) continue;
-      const response = await port.fetchFoodCoupons({ restaurantId, addressId });
+      const response = await getOrFetch(`coupons:${restaurantId}:${addressId}`, () =>
+        port.fetchFoodCoupons({ restaurantId, addressId }),
+      );
       results[index] = { restaurantId, coupons: response.coupons };
     }
   }

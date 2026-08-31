@@ -1,6 +1,12 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 const { generateContentMock } = vi.hoisted(() => ({ generateContentMock: vi.fn() }));
+
+// parseIntent.ts defaults to GEMINI_MODE=mock (zero-API-key demo path, see
+// parseIntentMock.ts) — these tests specifically exercise the real Gemini path.
+beforeAll(() => {
+  process.env.GEMINI_MODE = "live";
+});
 
 vi.mock("@google/genai", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@google/genai")>();

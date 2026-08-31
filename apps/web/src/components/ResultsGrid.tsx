@@ -5,13 +5,21 @@ import { FoodCard } from "./FoodCard.js";
 interface ResultsGridProps {
   status: SearchStatus;
   results: RankedCard[];
-  onAddToCart: (card: RankedCard) => void;
+  onAddToCart: (card: RankedCard, rank: number) => void;
   addingMenuItemId: string | null;
 }
 
 const SKELETON_COUNT = 6;
 
 export function ResultsGrid({ status, results, onAddToCart, addingMenuItemId }: ResultsGridProps) {
+  if (status === "idle") {
+    return (
+      <div className="rounded-xl border border-dashed border-gray-300 p-8 text-center text-sm text-gray-500">
+        Search for something to eat to see ranked results here.
+      </div>
+    );
+  }
+
   if (status === "loading") {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -34,11 +42,11 @@ export function ResultsGrid({ status, results, onAddToCart, addingMenuItemId }: 
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {results.map((card) => (
+      {results.map((card, index) => (
         <FoodCard
           key={card.menuItem.id}
           card={card}
-          onAddToCart={() => onAddToCart(card)}
+          onAddToCart={() => onAddToCart(card, index + 1)}
           adding={addingMenuItemId === card.menuItem.id}
         />
       ))}

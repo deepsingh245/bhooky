@@ -8,6 +8,7 @@ export function normalizeRestaurant(raw: RawSwiggyRestaurant): NormalizedRestaur
     rating: raw.avgRating,
     priceRange: estimatePriceRangeFromCostForTwo(raw.costForTwo),
     distanceKm: raw.sla.distanceKm,
+    deliveryTimeMinutes: raw.sla.deliveryTimeMinutes,
     isOpen: raw.availabilityStatus === "OPEN",
     cuisines: raw.cuisines,
   };

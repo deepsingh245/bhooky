@@ -4,7 +4,7 @@ import {
   MOCK_COUPONS,
   MOCK_MENUS_BY_RESTAURANT_ID,
   MOCK_RESTAURANTS,
-} from "./fixtures/mockData.js";
+} from "../dummy-data/index.js";
 import type {
   ApplyCouponArgs,
   FetchCouponsArgs,

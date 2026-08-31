@@ -1,7 +1,7 @@
 import type { SearchResponse } from "@bhooky/shared";
 import { parseIntent } from "../gemini/parseIntent.js";
 import { logQuery } from "../logging/logQuery.js";
-import { computeOfferScore } from "../ranking/offerScore.js";
+import { computeOfferScore, findBestOfferCoupon } from "../ranking/offerScore.js";
 import { rankResults } from "../ranking/rankResults.js";
 import { getCouponsForCandidates } from "../swiggy/getCoupons.js";
 import { getMenuForCandidates } from "../swiggy/getMenu.js";
@@ -34,8 +34,17 @@ export async function searchFood(userId: string, addressId: string, rawQuery: st
   const offerScoresByRestaurantId = new Map(
     couponResponses.map((response) => [response.restaurantId, computeOfferScore(response.coupons)]),
   );
+  const bestOfferByRestaurantId = new Map(
+    couponResponses.map((response) => [response.restaurantId, findBestOfferCoupon(response.coupons)]),
+  );
 
-  const rankedCards = rankResults(normalizedItems, normalizedRestaurants, intent, offerScoresByRestaurantId);
+  const rankedCards = rankResults(
+    normalizedItems,
+    normalizedRestaurants,
+    intent,
+    offerScoresByRestaurantId,
+    bestOfferByRestaurantId,
+  );
 
   void logQuery(
     userId,

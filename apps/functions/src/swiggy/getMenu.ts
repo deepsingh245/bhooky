@@ -1,3 +1,4 @@
+import { getOrFetch } from "./restaurantCache.js";
 import type { RawSwiggyMenuResponse, SwiggyMcpPort } from "./types.js";
 
 const MAX_CONCURRENT_MENU_FETCHES = 3;
@@ -14,7 +15,7 @@ export async function getMenuForCandidates(
       const index = cursor++;
       const restaurantId = restaurantIds[index];
       if (restaurantId === undefined) continue;
-      results[index] = await port.getRestaurantMenu({ restaurantId });
+      results[index] = await getOrFetch(`menu:${restaurantId}`, () => port.getRestaurantMenu({ restaurantId }));
     }
   }
 

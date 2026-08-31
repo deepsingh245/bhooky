@@ -12,7 +12,8 @@
     "build:watch": "tsc -b -w",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed": "tsx scripts/seedSwiggySession.ts"
+    "seed": "tsx scripts/seedSwiggySession.ts",
+    "analyze-ranking": "tsx scripts/analyzeRankingFeedback.ts"
   },
   "dependencies": {
     "@bhooky/shared": "*",

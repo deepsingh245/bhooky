@@ -6,6 +6,7 @@ import {
 } from "@bhooky/shared";
 import { Type } from "@google/genai";
 import { getGeminiClient } from "./geminiClient.js";
+import { parseIntentMock } from "./parseIntentMock.js";
 
 // Mirrors packages/shared/src/types/intent.ts's ParsedIntentFieldsSchema field-for-
 // field so the two can't silently drift, even though they're necessarily expressed
@@ -24,7 +25,13 @@ const RESPONSE_SCHEMA = {
 
 const STRICT_JSON_INSTRUCTION = "Return ONLY JSON matching the schema. No prose, no markdown code fences.";
 
+// GEMINI_MODE mirrors SWIGGY_MCP_MODE's mock|live selector: defaults to "mock"
+// so a fresh clone works with zero Gemini API key, no network call, no latency.
 export async function parseIntent(rawQuery: string): Promise<ParsedIntent> {
+  if ((process.env.GEMINI_MODE ?? "mock") !== "live") {
+    return parseIntentMock(rawQuery);
+  }
+
   const fields =
     (await requestParsedFields(rawQuery)) ??
     (await requestParsedFields(rawQuery, STRICT_JSON_INSTRUCTION)) ??

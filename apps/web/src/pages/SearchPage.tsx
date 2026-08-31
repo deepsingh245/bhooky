@@ -31,10 +31,14 @@ export function SearchPage() {
     void handleSearch(intentToQueryString(nextIntent));
   }
 
-  async function handleAddToCart(card: RankedCard) {
+  async function handleAddToCart(card: RankedCard, rank: number) {
     setAddingMenuItemId(card.menuItem.id);
     try {
-      await addItem(card.restaurant.id, card.menuItem.id, card.menuItem.name, card.menuItem.price, 1);
+      await addItem(card.restaurant.id, card.menuItem.id, card.menuItem.name, card.menuItem.price, 1, {
+        rank,
+        score: card.score,
+        scoreBreakdown: card.scoreBreakdown,
+      });
     } finally {
       setAddingMenuItemId(null);
     }

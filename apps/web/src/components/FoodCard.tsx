@@ -7,7 +7,7 @@ interface FoodCardProps {
 }
 
 export function FoodCard({ card, onAddToCart, adding }: FoodCardProps) {
-  const { menuItem, restaurant } = card;
+  const { menuItem, restaurant, bestOffer } = card;
 
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -23,6 +23,12 @@ export function FoodCard({ card, onAddToCart, adding }: FoodCardProps) {
         <span className="rounded bg-gray-100 px-2 py-1">₹{menuItem.price}</span>
         <span className="rounded bg-gray-100 px-2 py-1">★ {restaurant.rating.toFixed(1)}</span>
         <span className="rounded bg-gray-100 px-2 py-1">{restaurant.distanceKm.toFixed(1)} km</span>
+        <span className="rounded bg-gray-100 px-2 py-1">{restaurant.deliveryTimeMinutes} min</span>
+        {bestOffer && (
+          <span className="rounded bg-green-100 px-2 py-1 font-medium text-green-800">
+            ₹{bestOffer.discountAmount} off
+          </span>
+        )}
       </div>
 
       <button

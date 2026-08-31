@@ -31,7 +31,9 @@ export const orderHandler = onCall(async (request) => {
 
     try {
       const rawOrder = await placeOrderWithIdempotencyCheck(client, args);
-      for (const item of cart.items) void logRankingFeedback(uid, item.menuItemId, "ordered");
+      if (cart.restaurantId) {
+        for (const item of cart.items) void logRankingFeedback(uid, item.menuItemId, cart.restaurantId, "ordered");
+      }
 
       const order: Order = {
         id: rawOrder.orderId,

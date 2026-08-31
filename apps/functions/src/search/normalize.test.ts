@@ -20,6 +20,7 @@ describe("normalizeRestaurant", () => {
       rating: 4.3,
       priceRange: { min: 120, max: 280 },
       distanceKm: 1.2,
+      deliveryTimeMinutes: 30,
       isOpen: true,
       cuisines: ["North Indian"],
     });

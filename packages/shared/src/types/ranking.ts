@@ -13,4 +13,5 @@ export interface RankedCard {
   restaurant: NormalizedRestaurant;
   score: number;
   scoreBreakdown: ScoreBreakdown;
+  bestOffer: { code: string; discountAmount: number } | null;
 }

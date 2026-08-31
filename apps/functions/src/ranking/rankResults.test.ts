@@ -1,5 +1,6 @@
 import type { NormalizedMenuItem, NormalizedRestaurant, ParsedIntent } from "@bhooky/shared";
 import { describe, expect, it } from "vitest";
+import type { RawSwiggyCoupon } from "../swiggy/types.js";
 import { rankResults } from "./rankResults.js";
 
 const restaurants: NormalizedRestaurant[] = [
@@ -9,6 +10,7 @@ const restaurants: NormalizedRestaurant[] = [
     rating: 4.3,
     priceRange: { min: 100, max: 300 },
     distanceKm: 1.2,
+    deliveryTimeMinutes: 35,
     isOpen: true,
     cuisines: ["North Indian"],
   },
@@ -18,6 +20,7 @@ const restaurants: NormalizedRestaurant[] = [
     rating: 4.6,
     priceRange: { min: 60, max: 150 },
     distanceKm: 2.5,
+    deliveryTimeMinutes: 30,
     isOpen: true,
     cuisines: ["Healthy"],
   },
@@ -27,6 +30,7 @@ const restaurants: NormalizedRestaurant[] = [
     rating: 3.9,
     priceRange: { min: 150, max: 350 },
     distanceKm: 6,
+    deliveryTimeMinutes: 50,
     isOpen: false,
     cuisines: ["Continental"],
   },
@@ -84,9 +88,27 @@ describe("rankResults", () => {
       ["r1", 0],
       ["r2", 1],
     ]);
+    const winningCoupon: RawSwiggyCoupon = {
+      code: "FLAT50",
+      description: "Flat ₹50 off",
+      discountAmount: 50,
+      minOrderValueRupees: null,
+    };
+    const bestOfferByRestaurantId = new Map<string, RawSwiggyCoupon | null>([
+      ["r1", null],
+      ["r2", winningCoupon],
+    ]);
 
-    const ranked = rankResults(identicalItems, identicalRestaurants, baseIntent, offerScoresByRestaurantId);
+    const ranked = rankResults(
+      identicalItems,
+      identicalRestaurants,
+      baseIntent,
+      offerScoresByRestaurantId,
+      bestOfferByRestaurantId,
+    );
 
     expect(ranked[0]?.restaurant.id).toBe("r2");
+    expect(ranked[0]?.bestOffer).toEqual({ code: "FLAT50", discountAmount: 50 });
+    expect(ranked.find((card) => card.restaurant.id === "r1")?.bestOffer).toBeNull();
   });
 });

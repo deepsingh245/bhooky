@@ -7,6 +7,14 @@ import { getSwiggyMcpClient } from "../swiggy/mcpClient.js";
 import { getValidSwiggySession } from "../swiggy/session.js";
 import { parseRequest, requireUid, withSwiggyReconnect } from "./handlerUtils.js";
 
+const ScoreBreakdownSchema = z.object({
+  budgetMatch: z.number(),
+  distance: z.number(),
+  rating: z.number(),
+  offer: z.number(),
+  intentMatch: z.number(),
+});
+
 const UpdateCartRequestSchema = z.object({
   restaurantId: z.string().min(1),
   menuItemId: z.string().min(1),
@@ -14,6 +22,11 @@ const UpdateCartRequestSchema = z.object({
   price: z.number().nonnegative(),
   quantity: z.number().int().min(0),
   addressId: z.string().min(1),
+  // Only present when the add-to-cart action came from a rendered search
+  // result — see logRankingFeedback.ts's RankingFeedbackImpression.
+  rank: z.number().int().positive().optional(),
+  score: z.number().optional(),
+  scoreBreakdown: ScoreBreakdownSchema.optional(),
 });
 
 export const updateCartHandler = onCall(async (request) => {
@@ -30,7 +43,15 @@ export const updateCartHandler = onCall(async (request) => {
     const rawCart = await client.updateFoodCart(args);
     const cart = normalizeCart(rawCart);
     void mirrorCart(uid, cart);
-    if (args.quantity > 0) void logRankingFeedback(uid, args.menuItemId, "added_to_cart");
+
+    if (args.quantity > 0) {
+      const impression =
+        args.rank !== undefined && args.score !== undefined && args.scoreBreakdown
+          ? { rank: args.rank, score: args.score, scoreBreakdown: args.scoreBreakdown }
+          : null;
+      void logRankingFeedback(uid, args.menuItemId, args.restaurantId, "added_to_cart", impression);
+    }
+
     return cart;
   });
 });

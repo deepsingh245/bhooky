@@ -1,4 +1,4 @@
-import type { Address, Cart, Coupon, Order, SearchResponse, TrackOrderResponse } from "@bhooky/shared";
+import type { Address, Cart, Coupon, Order, ScoreBreakdown, SearchResponse, TrackOrderResponse } from "@bhooky/shared";
 import { httpsCallable } from "firebase/functions";
 import { authReady, functions } from "./firebase.js";
 
@@ -49,6 +49,10 @@ interface UpdateCartRequest {
   price: number;
   quantity: number;
   addressId: string;
+  // Only present when adding an item straight from a rendered search result.
+  rank?: number;
+  score?: number;
+  scoreBreakdown?: ScoreBreakdown;
 }
 
 interface FetchCouponsRequest {
@@ -72,7 +76,7 @@ interface PlaceOrderRequest {
 }
 
 interface OauthStartResponse {
-  authorizeUrl: string;
+  authorizeUrl: string | null;
 }
 
 const searchFoodCallable = httpsCallable<SearchRequest, SearchResponse>(functions, "searchHandler");
@@ -128,6 +132,6 @@ export function callTrackOrder(orderId: string): Promise<TrackOrderResponse> {
   return callWithReconnectHandling(async () => (await trackOrderCallable({ orderId })).data);
 }
 
-export function callOauthStart(): Promise<string> {
+export function callOauthStart(): Promise<string | null> {
   return callWithReconnectHandling(async () => (await oauthStartCallable({})).data.authorizeUrl);
 }

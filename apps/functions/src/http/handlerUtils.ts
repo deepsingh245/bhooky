@@ -1,3 +1,4 @@
+import { logger } from "firebase-functions";
 import type { CallableRequest } from "firebase-functions/v2/https";
 import { HttpsError } from "firebase-functions/v2/https";
 import type { ZodType } from "zod";
@@ -30,6 +31,10 @@ export async function withSwiggyReconnect<T>(fn: () => Promise<T>): Promise<T> {
         reason: "SWIGGY_RECONNECT_REQUIRED",
       });
     }
+    // Every onCall handler funnels through this one function, so this is the
+    // single choke point for blanket error visibility — see
+    // observability/mcpInstrumentation.ts for the equivalent on MCP calls.
+    logger.error("handler_error", { message: error instanceof Error ? error.message : String(error) });
     throw error;
   }
 }

@@ -1,5 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { instrumentMcpCall } from "../observability/mcpInstrumentation.js";
 import type {
   ApplyCouponArgs,
   FetchCouponsArgs,
@@ -75,9 +76,11 @@ export class LiveSwiggyMcpClient implements SwiggyMcpPort {
   }
 
   private async callTool<T>(name: string, args: object): Promise<T> {
-    const client = await this.getClient();
-    const result = await client.callTool({ name, arguments: args as Record<string, unknown> });
-    return extractToolJson<T>(result);
+    return instrumentMcpCall(name, async () => {
+      const client = await this.getClient();
+      const result = await client.callTool({ name, arguments: args as Record<string, unknown> });
+      return extractToolJson<T>(result);
+    });
   }
 
   private getClient(): Promise<Client> {

@@ -7,6 +7,7 @@ import {
   type ParsedIntent,
   type RankedCard,
 } from "@bhooky/shared";
+import type { RawSwiggyCoupon } from "../swiggy/types.js";
 
 const MAX_RELEVANT_DISTANCE_KM = 10;
 
@@ -20,6 +21,7 @@ export function rankResults(
   restaurants: NormalizedRestaurant[],
   intent: ParsedIntent,
   offerScoresByRestaurantId: Map<string, number> = new Map(),
+  bestOfferByRestaurantId: Map<string, RawSwiggyCoupon | null> = new Map(),
 ): RankedCard[] {
   const restaurantById = new Map(restaurants.map((restaurant) => [restaurant.id, restaurant]));
 
@@ -43,7 +45,12 @@ export function rankResults(
       scoreBreakdown.offer * RANKING_WEIGHTS.offer +
       scoreBreakdown.intentMatch * RANKING_WEIGHTS.intentMatch;
 
-    cards.push({ menuItem, restaurant, score, scoreBreakdown });
+    const bestOfferCoupon = bestOfferByRestaurantId.get(restaurant.id) ?? null;
+    const bestOffer = bestOfferCoupon
+      ? { code: bestOfferCoupon.code, discountAmount: bestOfferCoupon.discountAmount }
+      : null;
+
+    cards.push({ menuItem, restaurant, score, scoreBreakdown, bestOffer });
   }
 
   return cards.sort((a, b) => b.score - a.score).slice(0, MAX_RANKED_RESULTS);

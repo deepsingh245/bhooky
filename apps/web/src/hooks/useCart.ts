@@ -1,10 +1,16 @@
-import type { Cart } from "@bhooky/shared";
+import type { Cart, ScoreBreakdown } from "@bhooky/shared";
 import { useCallback, useEffect, useState } from "react";
 import { callGetCart, callUpdateCart } from "../lib/apiClient.js";
 
 interface CartState {
   cart: Cart | null;
   loading: boolean;
+}
+
+interface AddItemImpression {
+  rank: number;
+  score: number;
+  scoreBreakdown: ScoreBreakdown;
 }
 
 export function useCart(addressId: string | null) {
@@ -29,9 +35,16 @@ export function useCart(addressId: string | null) {
   }, [refresh]);
 
   const addItem = useCallback(
-    async (restaurantId: string, menuItemId: string, name: string, price: number, quantity: number) => {
+    async (
+      restaurantId: string,
+      menuItemId: string,
+      name: string,
+      price: number,
+      quantity: number,
+      impression?: AddItemImpression,
+    ) => {
       if (!addressId) return;
-      const cart = await callUpdateCart({ restaurantId, menuItemId, name, price, quantity, addressId });
+      const cart = await callUpdateCart({ restaurantId, menuItemId, name, price, quantity, addressId, ...impression });
       setState({ cart, loading: false });
     },
     [addressId],

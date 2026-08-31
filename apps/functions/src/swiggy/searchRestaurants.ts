@@ -1,4 +1,5 @@
 import type { ParsedIntent } from "@bhooky/shared";
+import { getOrFetch } from "./restaurantCache.js";
 import type { RawSwiggySearchResponse, SwiggyMcpPort } from "./types.js";
 
 export async function searchRestaurants(
@@ -6,12 +7,12 @@ export async function searchRestaurants(
   addressId: string,
   intent: ParsedIntent,
 ): Promise<RawSwiggySearchResponse> {
-  return port.searchRestaurants({
-    addressId,
-    query: buildQueryString(intent),
-    vegOnly: intent.food_type === "veg",
-    availabilityStatus: "OPEN",
-  });
+  const vegOnly = intent.food_type === "veg";
+  const query = buildQueryString(intent);
+
+  return getOrFetch(`search:${addressId}:${query}:${vegOnly}`, () =>
+    port.searchRestaurants({ addressId, query, vegOnly, availabilityStatus: "OPEN" }),
+  );
 }
 
 function buildQueryString(intent: ParsedIntent): string {
