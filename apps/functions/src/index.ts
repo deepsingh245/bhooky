@@ -1,10 +1,9 @@
-import { setGlobalOptions } from "firebase-functions/v2/options";
-
-// BHOOKY_BUILD_PLAN.md §1 mandates asia-south1 for data-residency reasons.
-// Pinned before real Swiggy OAuth redirect URI registration, since that URI
-// is tied to this region-qualified deployed function URL — changing it later
-// would mean re-registering with Swiggy.
-setGlobalOptions({ region: "asia-south1" });
+// MUST be the first import — sets the global region (asia-south1) as a side
+// effect before any handler module below is evaluated. ESM hoists these
+// `export { x } from "./..."` re-exports and evaluates them in source order, so
+// this side-effect import runs before every onCall() is defined. See
+// globalOptions.ts for the full explanation.
+import "./globalOptions.js";
 
 // Every deployed function name is prefixed "bhooky" — this project shares a
 // single real Firebase project with other apps, so function names (which are

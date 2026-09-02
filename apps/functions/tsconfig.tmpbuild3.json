@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "incremental": false,
+    "outDir": "/tmp/funcbuild2",
+    "paths": { "@bhooky/shared": ["../../packages/shared/dist/index.d.ts"] }
+  },
+  "references": [],
+  "exclude": ["**/*.test.ts"]
+}

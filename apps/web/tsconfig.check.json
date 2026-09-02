@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@bhooky/shared": ["../../packages/shared/dist/index.d.ts"]
+    }
+  }
+}

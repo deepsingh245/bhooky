@@ -1,4 +1,7 @@
 import type { ParsedIntent } from "@bhooky/shared";
+import { motion } from "motion/react";
+import { SparkleIcon } from "@/components/ui/animated-icons";
+import { cn } from "@/lib/utils";
 
 interface FilterChipsProps {
   intent: ParsedIntent;
@@ -23,25 +26,51 @@ export function FilterChips({ intent, onChange }: FilterChipsProps) {
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
-      <Chip label={formatFoodType(intent.food_type)} onClick={cycleFoodType} />
-      <Chip label={formatTime(intent.time)} onClick={cycleTime} />
-      {intent.taste && <Chip label={`"${intent.taste}"`} />}
-      {intent.budget !== null && <Chip label={`under ₹${intent.budget}`} />}
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-wrap items-center gap-2"
+    >
+      <span className="mr-1 inline-flex items-center gap-1 text-xs font-medium text-primary">
+        <SparkleIcon size={13} />
+        Understood as
+      </span>
+      <Chip label={formatFoodType(intent.food_type)} active={intent.food_type !== "any"} onClick={cycleFoodType} />
+      <Chip label={formatTime(intent.time)} active={intent.time !== "any"} onClick={cycleTime} />
+      {intent.taste && <Chip label={`“${intent.taste}”`} active readOnly />}
+      {intent.budget !== null && <Chip label={`under ₹${intent.budget}`} active readOnly />}
+    </motion.div>
   );
 }
 
-function Chip({ label, onClick }: { label: string; onClick?: () => void }) {
+function Chip({
+  label,
+  active,
+  onClick,
+  readOnly,
+}: {
+  label: string;
+  active?: boolean;
+  onClick?: () => void;
+  readOnly?: boolean;
+}) {
   return (
-    <button
+    <motion.button
+      layout
       type="button"
       onClick={onClick}
-      disabled={!onClick}
-      className="rounded-full border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-700 hover:enabled:border-orange-400 disabled:cursor-default"
+      disabled={readOnly}
+      whileTap={readOnly ? undefined : { scale: 0.94 }}
+      className={cn(
+        "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+        active
+          ? "border-primary/40 bg-primary/15 text-primary"
+          : "border-border/60 bg-secondary/40 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+        readOnly && "cursor-default",
+      )}
     >
       {label}
-    </button>
+    </motion.button>
   );
 }
 

@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "incremental": false,
+    "tsBuildInfoFile": null,
+    "baseUrl": ".",
+    "paths": {
+      "@bhooky/shared": ["../../packages/shared/dist/index.d.ts"]
+    }
+  },
+  "references": [],
+  "exclude": ["**/*.test.ts"]
+}

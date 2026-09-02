@@ -1,15 +1,27 @@
+import { motion } from "motion/react";
+import { AlertTriangle } from "lucide-react";
+
 export function SwiggyReconnectBanner() {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-      <span>Your Swiggy connection has expired. Reconnect to keep searching live restaurants.</span>
-      {/* Phase 1 has no real Swiggy OAuth entry point wired into the frontend yet
-          (that's the Phase 0 PKCE flow) — this is a placeholder target. */}
+    <motion.div
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="glass flex flex-col items-start justify-between gap-3 rounded-2xl border-amber-500/40 p-4 text-sm sm:flex-row sm:items-center"
+    >
+      <div className="flex items-center gap-3">
+        <span className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full bg-amber-500/15 text-amber-500">
+          <AlertTriangle size={18} />
+        </span>
+        <span className="text-foreground/90">
+          Your Swiggy connection needs reconnecting to search live restaurants.
+        </span>
+      </div>
       <a
         href="/connect-swiggy"
-        className="whitespace-nowrap rounded-lg bg-amber-600 px-3 py-1.5 font-medium text-white"
+        className="whitespace-nowrap rounded-lg bg-amber-500 px-4 py-2 font-medium text-amber-950 transition-transform hover:scale-[1.03] active:scale-95"
       >
         Reconnect Swiggy
       </a>
-    </div>
+    </motion.div>
   );
 }
