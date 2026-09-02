@@ -102,9 +102,10 @@ Runs the full `apps/functions` suite — `normalize.test.ts`,
 **Swiggy:** once you have Builders Club staging credentials, set
 `SWIGGY_MCP_MODE=live` and fill in `SWIGGY_MCP_BASE_URL`/`SWIGGY_OAUTH_CLIENT_ID`
 in `apps/functions/.env`. `SWIGGY_OAUTH_REDIRECT_URI`'s default
-(`http://localhost:5501/demo-bhooky/asia-south1/oauthCallbackHandler`) already
-matches this repo's emulator port and pinned region — register that exact URL
-with Swiggy (Swiggy's own docs allow `localhost` redirect URIs for dev).
+(`http://localhost:5501/demo-bhooky/asia-south1/bhookyOauthCallbackHandler`)
+already matches this repo's emulator port, pinned region, and the `bhooky`-
+prefixed deployed function name (see "Function naming" below) — register that
+exact URL with Swiggy (Swiggy's own docs allow `localhost` redirect URIs for dev).
 "Connect Swiggy" then runs the real OAuth 2.1 PKCE flow instead of the mock
 short-circuit. Nothing else changes: `swiggy/mcpClient.ts` picks
 `LiveSwiggyMcpClient` automatically.
@@ -128,6 +129,20 @@ if a real shape doesn't match:
 **Gemini:** set `GEMINI_MODE=live` and fill in a real `GEMINI_API_KEY`
 (https://aistudio.google.com/apikey) in `apps/functions/.env` to replace the
 local keyword-based mock parser with real Gemini structured-output parsing.
+
+## Function naming
+
+Every deployed Cloud Function is exported from `apps/functions/src/index.ts`
+with a `bhooky`-prefixed alias (`bhookySearchHandler`, `bhookyOauthCallbackHandler`,
+etc.) — the internal file/const names (`searchHandler.ts`'s `searchHandler`)
+are unchanged, only the name Firebase actually deploys under. This is because
+Cloud Function names are unique per Firebase **project**, not per codebase —
+if this app ever shares a single real Firebase project with other apps, their
+function names can't collide with this app's. `apps/web/src/lib/apiClient.ts`'s
+`httpsCallable(functions, "bhookyXxxHandler")` calls and
+`SWIGGY_OAUTH_REDIRECT_URI`'s path must always match these deployed names
+exactly — if you add a new handler, export it from `index.ts` with a
+`bhooky`-prefixed alias from the start.
 
 ## Deploying to a real Firebase project
 

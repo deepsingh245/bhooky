@@ -79,22 +79,28 @@ interface OauthStartResponse {
   authorizeUrl: string | null;
 }
 
-const searchFoodCallable = httpsCallable<SearchRequest, SearchResponse>(functions, "searchHandler");
+const searchFoodCallable = httpsCallable<SearchRequest, SearchResponse>(functions, "bhookySearchHandler");
 const sessionStatusCallable = httpsCallable<Record<string, never>, SessionStatusResponse>(
   functions,
-  "sessionStatusHandler",
+  "bhookySessionStatusHandler",
 );
 const getAddressesCallable = httpsCallable<Record<string, never>, AddressesResponse>(
   functions,
-  "getAddressesHandler",
+  "bhookyGetAddressesHandler",
 );
-const getCartCallable = httpsCallable<{ addressId: string }, Cart>(functions, "getCartHandler");
-const updateCartCallable = httpsCallable<UpdateCartRequest, Cart>(functions, "updateCartHandler");
-const getCouponsCallable = httpsCallable<FetchCouponsRequest, CouponsResponse>(functions, "getCouponsHandler");
-const applyCouponCallable = httpsCallable<ApplyCouponRequest, Cart>(functions, "applyCouponHandler");
-const placeOrderCallable = httpsCallable<PlaceOrderRequest, Order>(functions, "orderHandler");
-const trackOrderCallable = httpsCallable<{ orderId: string }, TrackOrderResponse>(functions, "trackOrderHandler");
-const oauthStartCallable = httpsCallable<Record<string, never>, OauthStartResponse>(functions, "oauthStartHandler");
+const getCartCallable = httpsCallable<{ addressId: string }, Cart>(functions, "bhookyGetCartHandler");
+const updateCartCallable = httpsCallable<UpdateCartRequest, Cart>(functions, "bhookyUpdateCartHandler");
+const getCouponsCallable = httpsCallable<FetchCouponsRequest, CouponsResponse>(functions, "bhookyGetCouponsHandler");
+const applyCouponCallable = httpsCallable<ApplyCouponRequest, Cart>(functions, "bhookyApplyCouponHandler");
+const placeOrderCallable = httpsCallable<PlaceOrderRequest, Order>(functions, "bhookyOrderHandler");
+const trackOrderCallable = httpsCallable<{ orderId: string }, TrackOrderResponse>(
+  functions,
+  "bhookyTrackOrderHandler",
+);
+const oauthStartCallable = httpsCallable<Record<string, never>, OauthStartResponse>(
+  functions,
+  "bhookyOauthStartHandler",
+);
 
 export function callSearchFood(rawQuery: string, addressId: string): Promise<SearchResponse> {
   return callWithReconnectHandling(async () => (await searchFoodCallable({ rawQuery, addressId })).data);

@@ -881,9 +881,9 @@ requireUid(request) either passes uid through or throws "unauthenticated"
 - **OAuth**: OAuth 2.1 with PKCE (S256), public client (no client secret anywhere in the codebase).
 - **Client ID configuration**: `SWIGGY_OAUTH_CLIENT_ID` env var, required in live mode (`authorizeUrl.ts::requireEnv`, throws if unset).
 - **Client secret handling**: none exists — this is a PKCE-only public-client flow.
-- **Redirect URI**: `SWIGGY_OAUTH_REDIRECT_URI` env var; README's documented default is `http://localhost:5501/demo-bhooky/asia-south1/oauthCallbackHandler` (matches the emulator's functions port + pinned region).
+- **Redirect URI**: `SWIGGY_OAUTH_REDIRECT_URI` env var; README's documented default is `http://localhost:5501/demo-bhooky/asia-south1/bhookyOauthCallbackHandler` (matches the emulator's functions port + pinned region).
 - **Authorization URL**: `{SWIGGY_MCP_BASE_URL}/auth/authorize?client_id=&redirect_uri=&state=&code_challenge=&code_challenge_method=S256&scope=mcp:tools+mcp:resources+mcp:prompts` (`authorizeUrl.ts`).
-- **Callback route**: `oauthCallbackHandler`, an `onRequest` (plain HTTPS, not a callable) — its deployed URL is exactly what `SWIGGY_OAUTH_REDIRECT_URI` must point to.
+- **Callback route**: deployed as `bhookyOauthCallbackHandler` (implementation in `oauthCallbackHandler.ts`), an `onRequest` (plain HTTPS, not a callable) — its deployed URL is exactly what `SWIGGY_OAUTH_REDIRECT_URI` must point to.
 - **Token exchange**: `POST {SWIGGY_MCP_BASE_URL}/auth/token`, form-encoded body `{grant_type: "authorization_code", code, code_verifier, redirect_uri, client_id}` (`exchangeToken.ts`), real `fetch()` call.
 - **Token storage**: Firestore `swiggy_sessions/{uid}` — `{token, expiresAt}`.
 - **Token refresh**: **none exists** — a flat 5-day expiry (`FIVE_DAYS_MS`), no refresh-token flow anywhere in the codebase; re-authorization is the only recovery path, explicitly by design per code comments citing `BHOOKY_BUILD_PLAN.md §7`.
@@ -1020,7 +1020,7 @@ No screen implements a distinct "partial data" state — every fetch either full
 ## 23. API Contract Reference
 
 ```text
-Name: searchHandler
+Name: bhookySearchHandler
 Method/Trigger: onCall
 Input: { rawQuery: string (min 1), addressId: string (min 1) }
 Output: { intent: ParsedIntent, results: RankedCard[] }
@@ -1029,7 +1029,7 @@ Errors: invalid-argument, unauthenticated, failed-precondition(SWIGGY_RECONNECT_
 Caller: apps/web/src/hooks/useSearch.ts
 Implementation: apps/functions/src/http/searchHandler.ts → search/searchFood.ts
 
-Name: sessionStatusHandler
+Name: bhookySessionStatusHandler
 Method/Trigger: onCall
 Input: (none)
 Output: { connected: boolean, expiresAt: number | null }
@@ -1038,7 +1038,7 @@ Errors: unauthenticated
 Caller: apps/web/src/hooks/useSwiggySession.ts
 Implementation: apps/functions/src/http/sessionStatusHandler.ts → swiggy/session.ts
 
-Name: getAddressesHandler
+Name: bhookyGetAddressesHandler
 Method/Trigger: onCall
 Input: (none)
 Output: { addresses: Address[] }
@@ -1047,7 +1047,7 @@ Errors: unauthenticated, failed-precondition(SWIGGY_RECONNECT_REQUIRED)
 Caller: apps/web/src/hooks/useAddresses.ts
 Implementation: apps/functions/src/http/getAddressesHandler.ts
 
-Name: getCartHandler
+Name: bhookyGetCartHandler
 Method/Trigger: onCall
 Input: { addressId: string (min 1) }
 Output: Cart
@@ -1056,7 +1056,7 @@ Errors: invalid-argument, unauthenticated, failed-precondition(SWIGGY_RECONNECT_
 Caller: apps/web/src/hooks/useCart.ts
 Implementation: apps/functions/src/http/getCartHandler.ts
 
-Name: updateCartHandler
+Name: bhookyUpdateCartHandler
 Method/Trigger: onCall
 Input: { restaurantId, menuItemId, name, price, quantity, addressId, rank?, score?, scoreBreakdown? }
 Output: Cart
@@ -1065,7 +1065,7 @@ Errors: invalid-argument, unauthenticated, failed-precondition(SWIGGY_RECONNECT_
 Caller: apps/web/src/hooks/useCart.ts
 Implementation: apps/functions/src/http/updateCartHandler.ts
 
-Name: getCouponsHandler
+Name: bhookyGetCouponsHandler
 Method/Trigger: onCall
 Input: { restaurantId: string (min 1), addressId: string (min 1) }
 Output: { coupons: Coupon[] }
@@ -1074,7 +1074,7 @@ Errors: invalid-argument, unauthenticated, failed-precondition(SWIGGY_RECONNECT_
 Caller: apps/web/src/hooks/useCoupons.ts
 Implementation: apps/functions/src/http/getCouponsHandler.ts
 
-Name: applyCouponHandler
+Name: bhookyApplyCouponHandler
 Method/Trigger: onCall
 Input: { restaurantId, addressId, code }
 Output: Cart
@@ -1083,7 +1083,7 @@ Errors: invalid-argument, unauthenticated, failed-precondition(SWIGGY_RECONNECT_
 Caller: apps/web/src/hooks/useCoupons.ts
 Implementation: apps/functions/src/http/applyCouponHandler.ts
 
-Name: orderHandler
+Name: bhookyOrderHandler
 Method/Trigger: onCall
 Input: { restaurantId: string (min 1), addressId: string (min 1) }
 Output: Order
@@ -1092,7 +1092,7 @@ Errors: invalid-argument, unauthenticated, failed-precondition (order cap OR SWI
 Caller: apps/web/src/hooks/useOrder.ts
 Implementation: apps/functions/src/http/orderHandler.ts → orders/orderRetry.ts
 
-Name: trackOrderHandler
+Name: bhookyTrackOrderHandler
 Method/Trigger: onCall
 Input: { orderId: string (min 1) }
 Output: TrackOrderResponse (raw MCP pass-through)
@@ -1101,7 +1101,7 @@ Errors: invalid-argument, unauthenticated, failed-precondition(SWIGGY_RECONNECT_
 Caller: apps/web/src/hooks/useOrder.ts (polled every 10s)
 Implementation: apps/functions/src/http/trackOrderHandler.ts
 
-Name: oauthStartHandler
+Name: bhookyOauthStartHandler
 Method/Trigger: onCall
 Input: (none)
 Output: { authorizeUrl: string | null }
@@ -1110,7 +1110,7 @@ Errors: unauthenticated
 Caller: apps/web/src/pages/ConnectSwiggyPage.tsx (direct)
 Implementation: apps/functions/src/http/oauthStartHandler.ts
 
-Name: oauthCallbackHandler
+Name: bhookyOauthCallbackHandler
 Method/Trigger: onRequest (plain HTTPS, not callable)
 Input: query params { code: string, state: string }
 Output: HTTP 302 redirect (no JSON body)
