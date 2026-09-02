@@ -1,3 +1,11 @@
+import { setGlobalOptions } from "firebase-functions/v2/options";
+
+// BHOOKY_BUILD_PLAN.md §1 mandates asia-south1 for data-residency reasons.
+// Pinned before real Swiggy OAuth redirect URI registration, since that URI
+// is tied to this region-qualified deployed function URL — changing it later
+// would mean re-registering with Swiggy.
+setGlobalOptions({ region: "asia-south1" });
+
 export { searchHandler } from "./http/searchHandler.js";
 export { sessionStatusHandler } from "./http/sessionStatusHandler.js";
 export { getAddressesHandler } from "./http/getAddressesHandler.js";

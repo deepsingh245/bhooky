@@ -2,7 +2,14 @@ import { initializeApp } from "firebase/app";
 import { connectAuthEmulator, getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 
-const app = initializeApp({ projectId: "demo-bhooky" });
+// Falls back to the emulator-only demo-bhooky config when VITE_FIREBASE_* is
+// unset, so local dev behavior is unchanged — set these only once deploying
+// against a real Firebase project.
+const app = initializeApp({
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID ?? "demo-bhooky",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+});
 
 export const auth = getAuth(app);
 export const functions = getFunctions(app);

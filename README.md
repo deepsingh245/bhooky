@@ -100,14 +100,54 @@ Runs the full `apps/functions` suite — `normalize.test.ts`,
 ## Going live with real data
 
 **Swiggy:** once you have Builders Club staging credentials, set
-`SWIGGY_MCP_MODE=live` and `SWIGGY_MCP_BASE_URL`/`SWIGGY_OAUTH_CLIENT_ID`/
-`SWIGGY_OAUTH_REDIRECT_URI` in `apps/functions/.env`. "Connect Swiggy" then
-runs the real OAuth 2.1 PKCE flow instead of the mock short-circuit. Nothing
-else changes: `swiggy/mcpClient.ts` picks `LiveSwiggyMcpClient` automatically.
-Before trusting it in a demo, smoke-test `liveClient.ts` against the real
-server — its request/response shape assumptions are unverified placeholders
-(see the comments in `apps/functions/src/swiggy/types.ts` and `liveClient.ts`).
+`SWIGGY_MCP_MODE=live` and fill in `SWIGGY_MCP_BASE_URL`/`SWIGGY_OAUTH_CLIENT_ID`
+in `apps/functions/.env`. `SWIGGY_OAUTH_REDIRECT_URI`'s default
+(`http://localhost:5501/demo-bhooky/asia-south1/oauthCallbackHandler`) already
+matches this repo's emulator port and pinned region — register that exact URL
+with Swiggy (Swiggy's own docs allow `localhost` redirect URIs for dev).
+"Connect Swiggy" then runs the real OAuth 2.1 PKCE flow instead of the mock
+short-circuit. Nothing else changes: `swiggy/mcpClient.ts` picks
+`LiveSwiggyMcpClient` automatically.
+
+Every `Raw*` shape in `apps/functions/src/swiggy/types.ts`, the OAuth endpoint
+assumptions, and `liveClient.ts`'s `structuredContent`-vs-text-block parsing
+are unverified guesses that have never run against a real Swiggy response —
+`liveClient.ts` now logs each tool call's raw result shape (`mcp_raw_shape` in
+the Functions emulator log) specifically so a mismatch is immediately visible
+instead of causing a confusing downstream bug. Verify in this order, fixing
+`types.ts`/the matching `normalize*` function before moving to the next tier
+if a real shape doesn't match:
+
+1. OAuth connect (validates the redirect URI, endpoints, scope, and token response shape)
+2. `get_addresses` — Swiggy's own documented "hello world" milestone
+3. `search_restaurants` + `get_restaurant_menu`
+4. `get_food_cart`/`update_food_cart`/`fetch_food_coupons`/`apply_food_coupon` (also revisit the hardcoded `FLAT_DELIVERY_FEE_RUPEES`/`REFERENCE_ORDER_VALUE_RUPEES` placeholders in `cart/cartTotals.ts`/`ranking/offerScore.ts` with real values if the API exposes them)
+5. The 401/reconnect path (`swiggy/session.ts`'s `isSwiggyUnauthorizedError` is a message-text heuristic — confirm it actually matches Swiggy's real error shape)
+6. `place_food_order`/`get_food_orders`/`track_food_order` last — most carefully, given the ₹1000 cap, COD-only constraint, and `place_food_order`'s non-idempotency
 
 **Gemini:** set `GEMINI_MODE=live` and fill in a real `GEMINI_API_KEY`
 (https://aistudio.google.com/apikey) in `apps/functions/.env` to replace the
 local keyword-based mock parser with real Gemini structured-output parsing.
+
+## Deploying to a real Firebase project
+
+Nothing above requires this — the emulator stack is a complete dev/demo
+environment on its own, including real Swiggy live-mode verification (Swiggy
+allows `localhost` redirect URIs for dev). Only do this for an actual public
+deployment:
+
+1. Create a real Firebase project and point `.firebaserc`'s `default` at it
+   (or pass `--project <id>` to `firebase` commands).
+2. `cp apps/web/.env.example apps/web/.env` and fill in
+   `VITE_FIREBASE_PROJECT_ID`/`VITE_FIREBASE_API_KEY`/`VITE_FIREBASE_AUTH_DOMAIN`
+   from that project's Firebase console — `apps/web/src/lib/firebase.ts` falls
+   back to the emulator-only `demo-bhooky` config when these are unset, so
+   local dev is unaffected either way.
+3. `npm run deploy` (root) — builds the web app and runs `firebase deploy`
+   (functions + Firestore rules/indexes + hosting, per `firebase.json`).
+
+Note: this environment's Node (`v24`) is newer than `apps/functions/package.json`'s
+pinned `engines.node: "20"` and `firebase.json`'s `runtime: "nodejs20"` — Cloud
+Functions always runs on Node 20 in production regardless of local version, so
+this only matters if local dev ever hits a Node 20-vs-24 behavior difference
+(none has been observed so far).

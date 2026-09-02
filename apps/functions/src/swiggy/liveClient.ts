@@ -1,5 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { logger } from "firebase-functions";
 import { instrumentMcpCall } from "../observability/mcpInstrumentation.js";
 import type {
   ApplyCouponArgs,
@@ -79,6 +80,7 @@ export class LiveSwiggyMcpClient implements SwiggyMcpPort {
     return instrumentMcpCall(name, async () => {
       const client = await this.getClient();
       const result = await client.callTool({ name, arguments: args as Record<string, unknown> });
+      logRawResultShape(name, result);
       return extractToolJson<T>(result);
     });
   }
@@ -97,6 +99,29 @@ export class LiveSwiggyMcpClient implements SwiggyMcpPort {
     await client.connect(transport);
     return client;
   }
+}
+
+// Every Raw* type in types.ts is an unverified guess until real Swiggy
+// responses are seen (see this file's header comment) — this turns "guess
+// what Swiggy's real field names are" into "read them off the emulator log"
+// for the first live call to each tool. Cheap and harmless to leave in
+// permanently; useful again any time a tool's response shape changes.
+function logRawResultShape(toolName: string, result: unknown): void {
+  const record = result as Record<string, unknown>;
+  const structuredContent = record["structuredContent"];
+  const content = record["content"];
+
+  logger.info("mcp_raw_shape", {
+    tool: toolName,
+    hasStructuredContent: structuredContent !== undefined,
+    structuredContentKeys:
+      structuredContent && typeof structuredContent === "object" ? Object.keys(structuredContent) : null,
+    contentBlockTypes: Array.isArray(content)
+      ? content.map((block) =>
+          typeof block === "object" && block !== null ? ((block as { type?: unknown }).type ?? "unknown") : typeof block,
+        )
+      : null,
+  });
 }
 
 function extractToolJson<T>(result: unknown): T {

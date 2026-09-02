@@ -11,7 +11,8 @@
     "test": "npm run test --workspaces --if-present",
     "dev": "npm run dev -w apps/web",
     "emulators": "firebase emulators:start --project demo-bhooky",
-    "seed": "npm run seed -w apps/functions"
+    "seed": "npm run seed -w apps/functions",
+    "deploy": "npm run build -w apps/web && firebase deploy"
   },
   "devDependencies": {
     "typescript": "^7.0.2"
